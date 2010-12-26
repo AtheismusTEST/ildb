@@ -1,0 +1,43 @@
+{% extends "skeleton.html" %}
+{% load books_extras %}
+{% block title %}Detail žánru {{genre.name}} {% endblock %}
+
+{% block headline %}<h1>Detail žánru: {{genre.name}}</h1>{% endblock %}
+
+{% block content %}
+    <div class="box detail">
+	<!-- hodnoceni -->
+	<div class="evaluation">
+	<div class='prc' >{{rating|floatformat}}%</div>
+	</div>
+
+	Název: {{genre.name}} <br />
+	<br />
+	About: <p>{{genre.about}}</p>
+    </div>
+
+	<div class="left" >
+		<div class="box">
+		
+		<div class="box-headline">Nejlepsi knihy tohoto žánru: </div>
+		<table>
+		{% for cur_book in best_rated_books %}
+			<tr><td><a href='/knihy/{{cur_book.pk}}'> {{cur_book.title}}</a></td>
+			<td> {{cur_book.rating_avg|get_rating_bar}}{{cur_book.rating_avg|floatformat}}%</td></tr>
+		{% endfor %}
+		</table>
+		</div>
+	</div>
+
+	<div class="right">
+		<div class="box">
+			<div class="box-headline">Nove knihy tohoto žánru: </div>
+			<table>
+			{% for cur_book in last_published_books %}
+				<tr><td><a href='/knihy/{{cur_book.pk}}'> {{cur_book.title}}</a></td><td>{{cur_book.publication_date}}</td></tr>
+			{% endfor %}
+			</table>
+		</div>
+    </div>
+	
+{% endblock %}

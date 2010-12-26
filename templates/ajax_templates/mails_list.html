@@ -1,0 +1,53 @@
+{% if mails_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if mails_list.has_previous %}
+            <a class="previous_mails" href="#mail_page_{{ mails_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ mails_list.number }} z {{ mails_list.paginator.num_pages }}.
+        </span>
+
+        {% if mails_list.has_next %}
+            <a class="next_mails" href="#mail_page_{{ mails_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='comments_list'>
+{% for cur_mail in mails_list.object_list %}
+    <div >
+	<p>
+		
+		{% if cur_mail.new_signal %}<strong>Nova zprava:</strong><br />{% endif %}
+	    <strong>Od:</strong> <a href='/uzivatele/{{cur_mail.sender.pk}}'>{{cur_mail.sender.username}}</a>&nbsp;
+		<strong>Pro:</strong> <a href='/uzivatele/{{cur_mail.consignees.pk}}'>
+		{% for consignee in cur_mail.consignees.all %}{{consignee.username}}{% endfor %}</a><br />
+	    <strong>{{cur_mail.subject}}</strong> - {{ cur_mail.publication_date|date:"D d M Y"}}<br />
+	    {{cur_mail.text}}
+	</p>
+    </div>
+    <br />
+{% endfor %}
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if mails_list.has_previous %}
+            <a class="previous_mails" href="#mail_page_{{ mails_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ mails_list.number }} z {{ mails_list.paginator.num_pages }}.
+        </span>
+
+        {% if mails_list.has_next %}
+            <a class="next_mails" href="#mail_page_{{ mails_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Žádná pošta
+{% endif %}

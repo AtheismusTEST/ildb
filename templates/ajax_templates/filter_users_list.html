@@ -1,0 +1,47 @@
+{% load books_extras %}
+{% if users_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if users_list.has_previous %}
+            <a class="previous_users" href="#user_page_{{ users_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ users_list.number }} z {{ users_list.paginator.num_pages }}.
+        </span>
+
+        {% if users_list.has_next %}
+            <a class="next_users" href="#user_page_{{ users_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='comments_list'>
+<table class="fiter_results">
+<tr><th>Nick</th><th>Body respektu</th> <th>Pocet komentaru</th> <th>Pocet hodnoceni</th> </tr>
+{% for cur_user in users_list.object_list %}
+    <tr><td class="first_column"><a href="/uzivatele/{{cur_user.user_id}}"> {{cur_user.username}}</a></td>
+	<td>{{cur_user.respect_points}}</td> <td>{{cur_user.comments_count}}</td> <td>{{cur_user.ratings_count}}</td></tr>
+{% endfor %}
+</table>
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if users_list.has_previous %}
+            <a class="previous_users" href="#user_page_{{ users_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ users_list.number }} z {{ users_list.paginator.num_pages }}.
+        </span>
+
+        {% if users_list.has_next %}
+            <a class="next_users" href="#user_page_{{ users_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Žádne odpovydajici vysledky
+{% endif %}

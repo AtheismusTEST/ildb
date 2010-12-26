@@ -1,0 +1,51 @@
+{% load books_extras %}
+
+{% if comment_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if comment_list.has_previous %}
+            <a class="previous_comments" href="#comment_page_{{ comment_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ comment_list.number }} z {{ comment_list.paginator.num_pages }}.
+        </span>
+
+        {% if comment_list.has_next %}
+            <a class="next_comments" href="#comment_page_{{ comment_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='comments_list'>
+{% for cur_comment in comment_list.object_list %}
+    <div class="box">
+	<p>
+	    <a href='/uzivatele/{{cur_comment.user.pk}}'>{{cur_comment.user.username}}</a>&nbsp;{{ cur_comment.his_rating|get_stars }}<br />
+	    {{ cur_comment.publication_date|date:"D d M Y"}}<br /> 
+	    {{cur_comment.content}}
+	</p>
+    </div>
+    <br />
+{% endfor %}
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if comment_list.has_previous %}
+            <a class="previous_comments" href="#comment_page_{{ comment_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ comment_list.number }} z {{ comment_list.paginator.num_pages }}.
+        </span>
+
+        {% if comment_list.has_next %}
+            <a class="next_comments" href="#comment_page_{{ comment_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Na tuto knihu ještě nebyla napsána žádná recenze, mužete být první!
+{% endif %}

@@ -1,0 +1,8 @@
+{% if messages %} <!-- TODO musim tohle delat messagema -->
+	{% for message in messages %}
+		<div id="notification" {% if message.tags == 'success' %} class="info" {% else %} class="error" {% endif %}>
+				{{ message }}
+		</div>
+	{% endfor %}
+{% endif %}
+

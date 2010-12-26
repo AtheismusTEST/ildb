@@ -1,0 +1,200 @@
+{% extends "skeleton.html" %}
+{% load books_extras %}
+{% block head_includes %}<!--<script type="text/javascript" src="/media/filter_form_actions.js"></script>-->{% endblock %}
+
+{% block title %}Výpis Knih{% endblock %}
+
+{% block script %}
+/* script je zapsan primo v kodu protoze jsou v nem pouzivany templateovaci promenne !!! */
+$(function(){
+	/* nastaveni sefovani slideru pro filtraci hodnoceni */
+	$("#slider-range").slider({
+		range: true,
+		min: 0,
+		max: 100,
+		values: [0, 100],
+		slide: function(event, ui) {
+			$("#amount").val(ui.values[0] + '% - ' + ui.values[1]+ '%');
+		},
+		change: function(event, ui) { update_results(1)}
+	});
+	$("#amount").val($("#slider-range").slider("values", 0) + '% - ' + $("#slider-range").slider("values", 1)+'%');
+
+	/* nastaveni slideru na filtraci data vydani*/
+	var d = new Date()
+	$("#slider-range-date").slider({
+		range: true,
+		min: {{oldest_publication_date}},
+		max: d.getFullYear(),
+		values: [{{oldest_publication_date}}, d.getFullYear()],
+		slide: function(event, ui) {
+			$("#amount-date").val(ui.values[0] + ' az ' + ui.values[1]);	
+		},
+		change: function(event, ui) {update_results(1)}
+	});
+	$("#amount-date").val($("#slider-range-date").slider("values", 0) + ' az ' + $("#slider-range-date").slider("values", 1));
+
+	/* jquery checkboxyky */
+	$( "#check" ).button();
+	$( "#format" ).buttonset();
+
+	/* nabindovani prapocitavani vysledku pri zmene kterehokoli form pole krom slideru ty to maj v sobe */
+	$("#filter_form").change( function() {update_results(1)} )
+
+	// prvni zobrazeni jeste nevyfilterovanych knih
+	update_results(1)
+
+})
+
+/* funkce pro vypleni vysledku podle danych filtru */
+function update_results (page_num) { 	
+
+	/*  ZOBRAZIM LOADING nad vysledkama */
+	$("#results-loading").html("<strong>Prepocitavam...</strong><img src='/media/img/loading_gif.gif' width=20 >");
+
+	/* pozbiram data z formulare a zpracuji pro ajax*/
+	
+	var min_date = $("#amount-date").attr("value").split(" ")[0]
+	var max_date = $("#amount-date").attr("value").split(" ")[2]
+
+	var min_rate = $("#amount").attr("value").split("%")[0]
+	var max_rate = $("#amount").attr("value").split("%")[1].split(" ")[2]
+
+	// projdu vsechny checkboxy, a hodnoty tech zaskrtnutych ulozim do pole genres
+	var genres = [] 
+	$.each($("#format input"), function(index, value) { 
+	 	if ($(value).attr("checked") == true ) {
+			genres[genres.length] = parseInt($(value).attr("value"));
+		}
+	});
+	if (genres.length != 0) genres = genres.join("|"); // udelam si z toho radeji string aby se to lepe posilalo
+	else genres = ""
+	//alert(genres)
+
+	// jeste vycucnu jak to mam radit
+	var order = $('select[name=order]').val()
+	var desc_or_asc = $('input[name=desc_or_asc]:radio:checked').val()
+	
+	$.post("/ajax/book_filter_result/"+page_num, 
+		{ 'min_date':min_date, 'max_date':max_date, 'min_rate': min_rate, 'max_rate':max_rate, 
+			'genres': genres, 'order': order , 'desc_or_asc':desc_or_asc },
+		function(data) {
+			$("#results").html(data);
+			
+	
+			$('.previous_books').click(function () { 
+				// vyzobnu si z hrefu spravne cislo stranky
+				var article_page_num = $(this).attr('href').split('_')
+
+				update_results(article_page_num[2])
+			})
+
+			$('.next_books').click(function () { 
+				var article_page_num = $(this).attr('href').split('_')
+
+				update_results(article_page_num[2])
+			})
+			
+			/* odstranim loading */
+			$("#results-loading").html("");
+		}
+	);
+
+}
+
+{% endblock %}
+
+{% block headline %}
+<h1>Výpis Knih</h1>
+<p>Komplení výpis knih, od nejlépe hodnocených</p>
+{% endblock %}
+
+{% block content %}
+	<div class="left">
+	
+	<h3 style="color:#C71E61;">Filrovani knih:</h3>
+	
+ 
+	
+	<from action='.' method='post' id="filter_form">
+
+	<!-- filtr zanru -->
+	<div id="format">
+	{% for genre in genres%}
+		<input type="checkbox" id="check{{forloop.counter}}" value="{{genre.pk}}"/>
+		<label style="width:50%" for="check{{forloop.counter}}">{{genre.name}}</label>
+	{% endfor %}
+	</div>
+	<br />
+
+
+	<!-- filtr hodnoceni knihy -->
+	<label for="amount">Rozmezi hodnosceni:</label>
+	<input type="text" id="amount" style="border:0; color:#f6931f; font-weight:bold;" />
+	<div id="slider-range"></div> <br />
+
+	<!-- filtr data vydani knihy -->
+	<label for="amount-date">Rozmezi vydani knihy:</label>
+	<input type="text" id="amount-date" style="border:0; color:#f6931f; font-weight:bold;" />
+	<div id="slider-range-date"></div> <br />
+
+	Řadit podle:	
+	<select id="order" name="order">
+		<option value="title">Název</option>
+		<option value="rating">Hodnocení</option>
+		<option value="publication_date">Datum vydání</option>
+	</select>
+	<br />
+	<input id="DESC" type="radio" name="desc_or_asc" value="DESC" checked="checked" /><label for="DESC">Sestupně</label>
+	<input id="ASC"  type="radio" name="desc_or_asc" value="ASC" /><label for="ASC">Vzestupně</label><br />
+	</form>	
+
+	
+
+	<!-- vysledky filtrace -->
+	<div id="results-loading" style="width:100%; height:20px" ><!--vyplnovano jen v pripade reloadu resultu --></div>
+	<div id="results" ><!-- vyplneno ajaxem --></div>
+	
+	</div> 
+	<div class="right" >
+
+		<div class="box" >
+		<div class="box-headline">Nejlepe hodnocene:</div>
+
+		<table class="top-list">
+		{% for cur_book in best_rated_books %}
+			<tr>
+			<td><a href='/knihy/{{cur_book.pk}}'>{{cur_book.title}}</a></td>
+			<td>{{cur_book.rating_avg|get_rating_bar}} {{cur_book.rating_avg|floatformat}}%</td>
+			</tr>
+		{% endfor %}
+		</table>
+		</div>
+		<br />
+
+		<div class="box">
+		<div class="box-headline">Nove na trhu:</div>
+		<table class="top-list">
+		{% for cur_book in last_published_books %}
+			<tr>
+			<td><a href='/knihy/{{cur_book.pk}}'> {{cur_book.title}}</a></td><td>{{cur_book.publication_date}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+		</div>
+		<br />
+
+		<div class="box">
+		<div class="box-headline">Posledni pridane:</div>
+		<table class="top-list">
+		{% for cur_book in last_added_books %}
+			<tr>
+			<td><a href='/knihy/{{cur_book.pk}}'> {{cur_book.title}}</a></td>
+			</tr>
+		{% endfor %}
+		</table>
+		</div>
+
+	</div>
+	
+{% endblock %}

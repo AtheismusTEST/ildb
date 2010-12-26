@@ -1,0 +1,197 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Výpis uživatelů{% endblock %}
+
+{% block headline %}
+<h1>Výpis uživatelů</h1>
+<p>Vypis všech uživatelů, seřazených podle něčeho, pozdeji na teto strance vice listu podle novotz oblibenosti a tak a moznost razeni a hledaní
+podle parametrů</p>
+{% endblock %}
+
+{% block script %}
+
+/* script je zapsan primo v kodu protoze jsou v nem pouzivany templateovaci promenne !!! */
+$(function(){
+
+	/* nastaveni sefovani slideru pro filtraci respektu */
+	$("#slider-range").slider({
+		range: true,
+		min: 0,
+		max: {{max_respect}},
+		values: [0, {{max_respect}}],
+		slide: function(event, ui) {
+			$("#amount").val(ui.values[0] + ' az ' + ui.values[1]);
+		},
+		change: function(event, ui) { update_results(1)}
+	});
+	$("#amount").val($("#slider-range").slider("values", 0) + ' az ' + $("#slider-range").slider("values", 1));
+
+
+	/* nastaveni slideru na filtraci poctu komentaru*/
+
+	$("#slider-range-comment").slider({
+		range: true,
+		min: 0,
+		max: {{max_comments}},
+		values: [0, {{max_comments}}],
+		slide: function(event, ui) {
+			$("#amount-comment").val(ui.values[0] + ' az ' + ui.values[1]);	
+		},
+		change: function(event, ui) {update_results(1)}
+	});
+	$("#amount-comment").val($("#slider-range-comment").slider("values", 0) + ' az ' + $("#slider-range-comment").slider("values", 1));
+
+
+	/* nastaveni slideru na filtraci */
+
+	$("#slider-range-rating").slider({
+		range: true,
+		min: 0,
+		max: {{max_ratings}},
+		values: [0,{{max_ratings}}],
+		slide: function(event, ui) {
+			$("#amount-rating").val(ui.values[0] + ' az ' + ui.values[1]);	
+		},
+		change: function(event, ui) {update_results(1)}
+	});
+	$("#amount-rating").val($("#slider-range-rating").slider("values", 0) + ' az ' + $("#slider-range-rating").slider("values", 1));
+
+
+
+	/* nabindovani prapocitavani vysledku pri zmene kterehokoli form pole krom slideru ty to maj v sobe */
+	$("#filter_form").change( function() {update_results(1)} )
+
+	// prvni zobrazeni jeste nevyfilterovanych knih
+	update_results(1)
+
+})
+
+/* funkce pro vypleni vysledku podle danych filtru */
+function update_results (page_num) { 	
+
+	/*  ZOBRAZIM LOADING nad vysledkama */
+	$("#results-loading").html("<strong>Prepocitavam...</strong><img src='/media/img/loading_gif.gif' width=20 >");
+
+	/* pozbiram data z formulare a zpracuji pro ajax*/
+
+	var min_respect = $("#amount").attr("value").split(" ")[0]
+	var max_respect = $("#amount").attr("value").split(" ")[2]
+
+	var min_comments = $("#amount-comment").attr("value").split(" ")[0]
+	var max_comments = $("#amount-comment").attr("value").split(" ")[2]
+
+	var min_ratings = $("#amount-rating").attr("value").split(" ")[0]
+	var max_ratings = $("#amount-rating").attr("value").split(" ")[2]
+
+
+	// jeste vycucnu jak to mam radit
+	var order = $('select[name=order]').val()
+	var desc_or_asc = $('input[name=desc_or_asc]:radio:checked').val()
+	
+	$.post("/ajax/user_filter_result/"+page_num, 
+		{ 'min_respect':min_respect, 'max_respect':max_respect, 'min_comments': min_comments, 'max_comments':max_comments, 
+			'min_ratings':min_ratings,'max_ratings':max_ratings,
+			'order': order , 'desc_or_asc':desc_or_asc },
+		function(data) {
+			$("#results").html(data);
+			
+	
+			$('.previous_books').click(function () { 
+				// vyzobnu si z hrefu spravne cislo stranky
+				var article_page_num = $(this).attr('href').split('_')
+
+				update_results(article_page_num[2])
+			})
+
+			$('.next_books').click(function () { 
+				var article_page_num = $(this).attr('href').split('_')
+
+				update_results(article_page_num[2])
+			})
+
+			/* odstranim loading */
+			$("#results-loading").html("");
+			
+		}
+	);
+
+}
+
+{% endblock %}
+
+
+{% block content %}
+	<div class="left">
+	<br />
+
+	<from action='.' method='post' id="filter_form">
+
+	<!-- filtr hodnoceni knihy -->
+	<label for="amount">Pocet bodu respektu:</label>
+	<input type="text" id="amount" style="border:0; color:#f6931f; font-weight:bold;" />
+	<div id="slider-range"></div> <br />
+
+	<!-- filtr poctu bodu respektu -->
+	<label for="amount-comment">Pocet komentaru:</label>
+	<input type="text" id="amount-comment" style="border:0; color:#f6931f; font-weight:bold;" />
+	<div id="slider-range-comment"></div> <br />
+
+	<!-- filtr pocet hodnoceni-->
+	<label for="amount-rating">Pocet hodnoceni:</label>
+	<input type="text" id="amount-rating" style="border:0; color:#f6931f; font-weight:bold;" />
+	<div id="slider-range-rating"></div> <br />
+
+	Řadit podle:	
+	<select id="order" name="order">
+		<option value="respect">Bodu respektu</option>
+		<option value="name">Nicku</option>
+	</select>
+	<br />
+	<input id="DESC" type="radio" name="desc_or_asc" value="DESC" checked="checked" /><label for="DESC">Sestupně</label>
+	<input id="ASC" type="radio" name="desc_or_asc" value="ASC" /><label for="ASC">Vzestupně</label><br />
+
+	</form>	
+
+	
+
+	<!-- vysledky filtrace -->
+	<div id="results-loading" style="width:100%; height:20px" ><!--vyplnovano jen v pripade reloadu resultu --></div>
+	<div id="results" ><!-- vyplneno ajaxem --></div>
+	</div> 
+	<div class="right" >
+
+		<div class="box" >
+			<div class="box-headline">Posledni pridani:</div>
+			<table>
+			{% for cur_user in last_added_users %}
+				<tr><td><a href='/uzivatele/{{cur_user.pk}}'> {{cur_user.username}}</a></td></tr>
+			{% endfor %}
+			</table>
+		</div>
+		<br />
+	
+		<div class="box">
+		<div class="box-headline">Nejvice bodu respektu:</div>
+		<table>
+		{% for cur_profile in best_rated_users %}
+			<tr><td><a href='/uzivatele/{{cur_profile.pk}}'> {{cur_profile.username}}</a></td><td>{{cur_profile.respect_points}}</td></tr>
+		{% endfor %}
+		</table>
+		</div>
+		<br />
+
+		<div class="box">
+		<div class="box-headline">Nejvice recenzi:</div>
+		<table>
+		{% for cur_profile in best_comentators_users %}
+			<tr><td><a href='/uzivatele/{{cur_profile.pk}}'> {{cur_profile.username}}</a></td><td>{{cur_profile.comment_count}}</td></tr>
+		{% endfor %}
+		</table>
+		</div>
+		<br />
+
+
+
+	</div>
+	
+{% endblock %}

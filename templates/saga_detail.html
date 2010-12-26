@@ -1,0 +1,26 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Detail série: {{saga.title}} {% endblock %}
+
+{% block headline %}<h1>Detail série: {{saga.title}}</h1>{% endblock %}
+
+{% block content %}
+    <div class="box detail">
+	<!-- hodnoceni -->
+	<div class="evaluation">
+	<div class='prc' >{{rating|floatformat}}%</div>
+	</div>
+
+	Název: {{saga.title}} ({{saga.original_title}})<br />
+	Počet dílů: {{ book_list|length }}
+	
+	<br />
+	About: <p>{{saga.about}}</p>
+    </div>
+
+	<h4>Knihy z této série: </h4>
+	{% for cur_book in book_list %}
+	    <strong>{{forloop.counter}}.</strong> <a href='/knihy/{{cur_book.pk}}'>{{cur_book.title}}</a> <br />
+	{% endfor %}
+    
+{% endblock %}

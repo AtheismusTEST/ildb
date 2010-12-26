@@ -1,0 +1,47 @@
+{% load books_extras %}
+{% if books_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if books_list.has_previous %}
+            <a class="previous_books" href="#book_page_{{ books_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ books_list.number }} z {{ books_list.paginator.num_pages }}.
+        </span>
+
+        {% if books_list.has_next %}
+            <a class="next_books" href="#book_page_{{ books_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='comments_list'>
+<table class="fiter_results">
+<tr><th>Nazev</th><th>Hodnoceni</th><th>Datum vydani</th></tr>
+{% for cur_book in books_list.object_list %}
+    <tr><td class="first_column"><a href="/knihy/{{cur_book.pk}}"> {{cur_book.title}}</a></td> 
+	<td>{{cur_book.rating_avg|get_rating_bar}}{{cur_book.rating_avg|floatformat}}%</td><td>{{cur_book.publication_date}}</td></tr>
+{% endfor %}
+</table>
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if books_list.has_previous %}
+            <a class="previous_books" href="#book_page_{{ books_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ books_list.number }} z {{ books_list.paginator.num_pages }}.
+        </span>
+
+        {% if books_list.has_next %}
+            <a class="next_books" href="#book_page_{{ books_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Žádne odpovydajici vysledky
+{% endif %}

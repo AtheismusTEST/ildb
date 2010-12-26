@@ -1,0 +1,49 @@
+{% load books_extras %}
+{% if authors_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if authors_list.has_previous %}
+            <a class="previous_authors" href="#author_page_{{ authors_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ authors_list.number }} z {{ authors_list.paginator.num_pages }}.
+        </span>
+
+        {% if authors_list.has_next %}
+            <a class="next_authors" href="#author_page_{{ authors_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='comments_list'>
+<table class="fiter_results">
+<tr><th>Jmeno</th><th>Hodnoceni</th><th>Datum narozeni</th></tr>
+{% for cur_author in authors_list.object_list %}
+    <tr> <td class="first_column"><a href="/autori/{{cur_author.pk}}"> {{cur_author.first_name}} {{cur_author.last_name}}</a></td> 
+	<td>{{cur_author.rating_avg|get_rating_bar}} {{cur_author.rating_avg|floatformat}}%</td>
+
+	<td>{{cur_author.birth_day}}</td> </tr>
+{% endfor %}
+</table>
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if authors_list.has_previous %}
+            <a class="previous_authors" href="#author_page_{{ authors_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ authors_list.number }} z {{ authors_list.paginator.num_pages }}.
+        </span>
+
+        {% if authors_list.has_next %}
+            <a class="next_authors" href="#author_page_{{ authors_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Žádne odpovydajici vysledky
+{% endif %}

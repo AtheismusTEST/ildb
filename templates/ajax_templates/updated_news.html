@@ -1,0 +1,16 @@
+<div>
+<div class="box-headline">Novinky na čsld - ({{last_update_time}})</div>
+<table>
+<tr><td>Nejnovější kniha:</td>
+<td><a href='/knihy/{{last_book.pk}}'>{{last_book.title}} </a></td></tr>
+
+<tr><td>Nový profil autora:</td>
+<td><a href='/autori/{{last_author.pk}}'>{{last_author.first_name}} {{last_author.last_name}}</a></td></tr>
+
+<tr><td>Nejnovější uživatel:</td>
+<td><a href='/uzivatele/{{last_user.pk}}'>{{last_user.username}}</a></td></tr>
+
+<tr><td>Nejnovější komentář:</td>
+<td><a href='/knihy/{{last_comment.book.pk}}'>{{last_comment.user.username}} o knize {{last_comment.book.title}}</a></td></tr>
+</table>
+</div>

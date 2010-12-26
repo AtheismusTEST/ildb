@@ -1,0 +1,29 @@
+<div id="article_list">
+{% for article in articles.object_list %}
+	<div >
+	{% if article.main_picture %}
+	<img src='/media/{{article.main_picture}}' alt='' width='60' title='Titulni obrazek' style='float:left; padding:5px '  />
+	{% endif %}
+		<div class='article'>
+			<h5>{{article.title}}</h5>
+			<p>{{article.content|truncatewords_html:30}} <a href="#article_{{article.id}}">(více)</a></p>
+		</div>
+	</div>
+{% endfor %}
+</div>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if articles.has_previous %}
+            <a id="previous_articles" href="#article_page_{{ articles.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ articles.number }} z {{ articles.paginator.num_pages }}.
+        </span>
+
+        {% if articles.has_next %}
+            <a id="next_articles" href="#article_page_{{ articles.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>

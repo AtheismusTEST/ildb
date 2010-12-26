@@ -1,0 +1,165 @@
+{% extends "skeleton.html" %}
+{% load books_extras %}
+
+{% block title %}Detail knihy {{book.title}}{% endblock %}
+
+{% block headline %}<h1>Detail Knihy: {{book.title}} ({{book.original_title}})</h1>{% endblock %}
+
+{% block script %}
+
+$(function(){
+	print_all_comments(1,{{book.id}});
+
+	var current_type = "favourite_books"
+	set_favourites_buttons(current_type);
+	
+	$('#id_rating').bind("change",function() {
+	    $('#rating_form').submit();
+	});
+
+	$('#comment_order').bind("change", 
+		function() { print_all_comments(1,{{book.id}});})
+
+});
+<!-- printnuti ajaxem vsech recenzi vcerne printovani pri posouvani podle cisla page -->
+function print_all_comments(page,book_id) {
+	var order = $('#comment_order').val()
+	$('#comments').empty().html("<img src='/media/img/loading_gif.gif' width=60 >")
+    $('#comments').load("/ajax/print_all_comments/"+page+"/"+book_id+"/"+order, function () {
+	
+	// obsluha navigacnich odkazu
+	
+	$('.previous_comments').click(function () { 
+	    // vyzobnu si z hrefu spravne cislo stranky
+	    var article_page_num = $(this).attr('href').split('_')
+
+	    print_all_comments(article_page_num[2],{{book.id}})
+	})
+
+	$('.next_comments').click(function () { 
+	    var article_page_num = $(this).attr('href').split('_')
+
+	    print_all_comments(article_page_num[2],{{book.id}})
+	})
+	
+    }); 
+}
+
+<!-- vytisknu cudliky na odebirani nebo pridavani do favourite pripadne je vubec nevistisknu pac je plno-->
+function set_favourites_buttons (entity_type) {
+
+    var entity_id = {{book.id}} // dosadim si to rovnou sem abych to nemusel nekde zbirat
+
+    // zjistim jestli tahle kniha je v oblibenejch tohoto uzivatele
+    $.ajax({
+	type: "GET",
+	url: "/ajax/is_in_favourite/"+entity_type+"/"+entity_id,
+	success:function(response){
+	    // je v oblibenych
+	    if (response == "True") {
+		$("#favourite_area").html("<a id='delete_favourite_button' href='#'  >Odebrat knihu z mích oblíbených</a>");
+		$("#delete_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    delete_favourite(entity_type,{{book.id}})
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	    // neni v oblibenych
+	    if (response == "False") {
+		$("#favourite_area").html("<a id='add_favourite_button' href='#'  >Přidat knihu k mím oblíbeným</a>");
+		$("#add_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    add_favourite(entity_type,{{book.id}}) 
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	}  
+    }); 
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="box detail">
+	{% if book.cover %}
+	<img src="/media/{{book.cover}}" alt="prdel" width="160" height="215" title="Obrazek Obalky" style="float:left" class='portrait' />
+	{% endif %}
+
+		<!-- hodnoceni -->
+		<div class="evaluation">
+			<div class='prc' >{{rating|floatformat}}%</div>
+			<table>
+			{% for r in ratings %}
+				<tr {% if r.friend_flag %} class='friends_rating_tr' {% endif %} ><td><a href='/uzivatele/{{r.user_id}}' >{{ r.username }}</a></td>
+				<td> {{ r.rate|get_stars }}</td></tr>
+			{% endfor %}
+
+
+			</table>
+		</div>
+			
+	    
+	    Autor: 
+	    {% for cur_author in author_list %}
+		{% if not forloop.first %} / {% endif %}
+		<a href='/autori/{{cur_author.pk}}'> {{cur_author.last_name}} {{cur_author.first_name}}</a>  
+
+	    {% endfor %}
+	    <br />
+	    Žánr: 
+	    {% for cur_genre in genre_list %}
+		{% if not forloop.first %} / {% endif %}
+		<a href='/zanry/{{cur_genre.pk}}'> {{cur_genre.name}}</a> 
+	    {% endfor %}
+	    <br />
+	    {% if book.saga %}
+		Série: <a href='/serie/{{book.saga.id}}'> {{book.saga.title}} ({{book.saga.original_title}})</a><br />
+	    {% endif %}
+	    
+	    Vydáno Dne: {{book.publication_date}}
+
+	    {% if user.is_authenticated %}
+		<!-- form na hodnoceni -->
+		<form action="." method="POST" id="rating_form">
+		{{ rating_form.rating.errors }}
+		{{ rating_form.as_table }}
+		<br />
+		<div id="favourite_area" ><!-- odkaz na pridani odebrani z favourites vyplnen Ajaxem--></div>
+	    </form>
+	    {% endif %}
+
+
+	    <h4>O knize:</h4>
+	    <p>{{book.about}}</p>
+
+		{% include "social_share.html" %} 
+
+    </div>
+
+    <h4>Recenze:</h4>
+    
+    {% if user.is_authenticated %}
+    <form action="." method="POST">
+    {{ comment_form.content.errors }}
+    {{ comment_form.content.label_tag }} <br />
+    {{ comment_form.content }} 
+    <br />
+    <input type='submit' value='přidat recenzi' />
+    </form>
+    {% endif %}
+
+    <br />
+
+	Seradit podle:
+	<select id="comment_order">
+		<option value="respect" >respektu a vasich preferenci</option>
+		<option value="date" >stari komentare</option>
+	</select>
+    <div id='comments'>
+    <!-- plneno ajaxem -->
+    </div>
+    
+
+{% endblock %}

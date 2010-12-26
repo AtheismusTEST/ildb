@@ -1,0 +1,47 @@
+{% load books_extras %}
+
+{% if rating_list.object_list %}
+<div class="pagination">
+    <span class="step-links">
+        {% if rating_list.has_previous %}
+            <a class="previous_ratings" href="#rating_page_{{ rating_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ rating_list.number }} z {{ rating_list.paginator.num_pages }}.
+        </span>
+
+        {% if rating_list.has_next %}
+            <a class="next_ratings" href="#rating_page_{{ rating_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class='ratings_list'>
+	<table>
+{% for rating in rating_list.object_list %}
+
+	<tr><td><a href="/knihy/{{rating.book.id}}">{{ rating.book }}</a></td><td> {{ rating.rate|get_stars }}</td></tr>
+{% endfor %}
+	</table>
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if rating_list.has_previous %}
+            <a class="previous_ratings" href="#rating_page_{{ rating_list.previous_page_number }}">&lt;&lt; předchozí</a>
+        {% endif %}
+
+        <span class="current">
+            Strana {{ rating_list.number }} z {{ rating_list.paginator.num_pages }}.
+        </span>
+
+        {% if rating_list.has_next %}
+            <a class="next_ratings" href="#rating_page_{{ rating_list.next_page_number }}">další &gt;&gt;</a>
+        {% endif %}
+    </span>
+</div>
+{% else %}
+Na tuto knihu ještě nebyla napsána žádná recenze, mužete být první!
+{% endif %}

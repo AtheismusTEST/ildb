@@ -1,0 +1,62 @@
+{% extends "skeleton.html" %}
+
+{% block head_includes %}
+<!-- real-time validace formulare registrace -->
+<script type="text/javascript" src="/media/registration_validation.js"></script>
+{% endblock %}
+
+{% block title %}Registrace{% endblock %}
+
+{% block headline %}
+<h1>Registrace nového uživatele</h1>
+<p> Připojte se k nám</p>
+{% endblock %}
+
+
+
+{% block content %}
+
+{% if form.errors %}
+    <div id="error" class="ui-widget">
+	    <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+		    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+		    <strong>Registrace selhala </strong>zkontrolujte jestli jste správně vyplnil všechna políčka</p>
+	    </div>
+    </div>
+{% endif %}
+
+<!-- Registracni form -->
+<br />
+<form action="." method="POST">
+<table class="grey">
+{% for field in form %} 
+    {% if field.errors %}
+	<tr><td colspan=2>{{ field.errors }}</td></tr>  
+    {% endif %}
+    <tr>
+    <th>{{ field.label_tag }}</th>
+    <td>{{ field }}</td>
+    <td class="error" style="visibility:hidden"></td>
+    </tr>
+{% endfor %}
+</table>
+<br />
+<!-- Capcha -->
+<table>
+
+    {{ captcha.as_table }}
+    <!--
+    <tr>
+    <td>{{ capcha_question }}</td>
+    <td><input type="text" name="capcha_ans" /></td>
+    <input type="hidden" name="q_index" value="{{ capcha_index }}" />
+    </tr>
+
+    -->
+    <tr>
+    
+    <td><input type="submit" value="Registrovat" /></td>
+    </tr>
+</table>
+</form>
+{% endblock %}

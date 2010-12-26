@@ -1,0 +1,31 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Přihlášení{% endblock %}
+
+{% block headline %}<h1>Přihlášení</h1>{% endblock %}
+
+{% block content %}
+
+{% if form.errors %}
+    <div id="error" class="ui-widget">
+	    <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
+		    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
+		    <strong>Chyba: </strong>Špatně zadané uživatelské jméno nebo heslo. Zkuste se prosím přihlásit znovu.</p>
+	    </div>
+    </div>
+{% endif %}
+
+<form action="." method="POST">
+{% csrf_token %}
+<table >
+{{ form.as_table }}
+<tr>
+<td></td>
+<td>
+<input type="submit" value="Přihlásit se">
+<input type="hidden" name="next" value="{{next}}">
+</td>
+</tr>
+</table>
+</form>
+{% endblock %}

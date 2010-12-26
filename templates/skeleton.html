@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="cs">
+<head>
+    <link rel="stylesheet" href="/media/art.css" type="text/css" />
+	<!-- jQuery -->
+	<link type="text/css" href="/media/jquery-ui-1.8.1.custom/css/eggplant/jquery-ui-1.8.1.custom.css" rel="stylesheet" />	
+	<script type="text/javascript" src="/media/jquery-ui-1.8.1.custom/js/jquery-1.4.2.min.js"></script>
+	<script type="text/javascript" src="/media/jquery-ui-1.8.1.custom/js/jquery-ui-1.8.1.custom.min.js"></script>
+	<script type="text/javascript" src="/media/common_functions.js"></script>
+	
+
+{% block head_includes %}{% endblock %}
+
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>{% block title %}{% endblock %}</title>
+<script type="text/javascript">
+
+{% block script %}{% endblock %}
+
+</script>
+</head>
+<body>
+<!--<div id='#quotation' style='color:white'>"citat jakoze totally uplne nejvic a rek to nakej desnej typek kterej nevi" - Tomas Valenta</div>-->
+
+
+{% include 'messages.html' %}
+<div id="main">
+
+    <div id="header">
+
+	<img src="/media/img/logo.png" style="width:650px; height:110px" />
+	
+    </div>
+    <div id="menu">
+
+	<div id="search_box" >
+	    <form action="/vyhledavani/" method="post" >
+		<input type="text" name="query" id="tags"  value="hledej..." />
+		<!--<input type="submit" value="Go" id="search_button"/>-->
+	    </form>
+	</div> 
+
+	<!--autentizacni veci -->
+	<div id="login">
+
+	    {% if user.is_authenticated %}
+			<ul class="nav">
+			<li><a href="/accounts/profile/">{{ user }}</a></li>
+			<li><a id="mailbox-button" href="/accounts/mailbox/">M</a></li>
+				{% if user.is_staff %}
+				<li><a href="/admin/">Admin</a></li>
+				{% endif %}
+			<li><a href="/accounts/logout/">Odhlásit</a></li>
+
+	    {% else %}
+			<ul class="nav">
+			<li><a href="/accounts/login/?next={{request.path}}">Přihlásit</a></li>
+			<li><a href="/accounts/registrace/">Registrace</a></li>
+			</ul>
+	    {% endif %}
+		
+ 	</div>
+	<div class="magic-hover" >
+		<ul class="nav" >
+	
+				<li><a class="{{home_active}}" href='/'>		Uvodní stránka</a></li>
+				<li><a class="{{books_active}}" href='/knihy/'>	Knihy</a></li>
+				<li><a class="{{authors_active}}" href='/autori/'>	Autoři</a></li>
+				<li><a class="{{users_active}}" href='/uzivatele/'>	Uživatelé</a></li>
+				<!--<li><a class="{{genres_active}}" href='/zanry/'>	Žánry</a></li> -->
+
+	
+		</ul>
+	</div>
+	
+	
+    </div>
+
+
+	<div id="content">
+		<div class="headline" >
+			{% block headline %}{% endblock %}
+		</div>
+	
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="footer">
+    </div>
+</div>
+
+</body>
+</html>

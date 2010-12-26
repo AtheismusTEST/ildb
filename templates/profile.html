@@ -1,0 +1,67 @@
+{% extends "skeleton.html" %}
+
+{% block head_includes %}
+<script type="text/javascript" src="/media/profile_actions.js"></script>
+{% endblock %}
+
+
+{% block title %}Uživatelský profil{% endblock %}
+
+{% block headline %}<h1>Uživatelský profil</h1>{% endblock %}
+
+{% block content %}
+
+{% if saved %}
+    <div id="info" class="ui-widget">
+	    <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+		    <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+		    <strong>Výborně!</strong> Profil byl úspěšně upraven.</p>
+	    </div>
+    </div>
+{% endif %}
+
+<form action="." method="POST" enctype="multipart/form-data">
+<table class='grey'>
+    {{ profile_form.as_table }}
+    <tr>
+    <td></td>
+    <td><input type="submit" value="Uložit profil"></td>
+    </tr>
+</form>
+<br />
+<form action="." method="POST">
+    {{ password_form.as_table }}
+    <tr>
+    <td></td>
+    <td><input type="submit" value="Uložit změnu hesla"></td>
+    </tr>
+</table>
+</form>
+
+<h3>Oblíbené</h3>
+
+<strong>Knihy:</string>
+<input type="text" name="query" id="tags_book" />
+
+<div id="favourite_books">
+<!-- vyplnen Ajaxem -->
+</div>
+
+
+<br /><br /><strong>Autoři:</string>
+<input type="text" name="query" id="tags_author" />
+
+<div id="favourite_authors">
+<!-- vyplneno Ajaxem -->
+</div>
+
+
+<br /><br /><strong>Uživatelé:</string>
+<input type="text" name="query" id="tags_user" />
+
+
+<div id="favourite_users">
+<!-- vyplnen Ajaxem -->
+</div>
+
+{% endblock %}

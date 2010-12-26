@@ -1,0 +1,7 @@
+<div>
+<h4>{{article.title}}</h4>
+{% if article.main_picture %}
+<img src='/site_media/{{article.main_picture}}' alt='' width='100' title='Titulni obrazek' style='float:left' class='portrait'/>
+{% endif %}
+<p>{{article.content}}</p><a href='#all_articles' >zpět na výpis všech</a>
+</div>

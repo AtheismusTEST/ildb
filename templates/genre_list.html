@@ -1,0 +1,14 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Výpis žanru{% endblock %}
+
+{% block headline %}
+<h1>Výpis žanru</h1>
+<p>Vypis žánrů, jakože</p>
+{% endblock %}
+
+{% block content %}
+    {% for cur_genre in genre_list %}
+    	<a href='/zanry/{{cur_genre.pk}}'>{{cur_genre.name}}</a><br />
+    {% endfor %}
+{% endblock %}

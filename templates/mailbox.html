@@ -1,0 +1,96 @@
+{% extends "skeleton.html" %}
+
+{% block script %}
+
+$(function(){
+
+	//defaultne zobrazi prijate zpravy
+	print_mails(1,"received")
+
+	//nabinduju efekt na prepinac zprav
+	$('#id_option').change(function() {
+		
+		print_mails(1,$(this).attr('value'))
+	});
+
+    //naseptavac pro policko adresata
+	$.getJSON("/ajax/get_keywords/", function(json) {
+
+		// nactu si knihovnicku soucasnejch uzivatelu pro bindnuti
+	    var user_keywords = [];
+	    var user_keyword_metadata = []
+
+		$.each(json, function(index, value) { 
+			if (value.model == "auth.user"){
+				// alert('user')
+				user_keywords[user_keywords.length] = value.fields.username+" - "+value.fields.first_name+" "+value.fields.last_name
+				user_keyword_metadata[user_keywords[user_keywords.length-1]] = value.pk
+			}
+	    });
+
+		// musim pridat autocomplete
+		$("#id_consignee_search").autocomplete({
+			minLength: 3,
+			source: user_keywords,
+			select: function(event, ui) { 
+				// ted je potreba to idcko zapsat do neviditelneho pole formulare
+				$('#id_consignee_id').attr('value',user_keyword_metadata[ui.item.value]);
+			}	
+		});
+	})
+
+	// zobrazeni mailu zvoleneho druhu
+	function print_mails(page,send_or_recieved) {
+		$('#mails').empty().html("<img src='/media/img/loading_gif.gif' width=60 >")
+		$('#mails').load("/ajax/print_all_mails/"+send_or_recieved+"/"+page, function () {
+	
+			// obsluha navigacnich odkazu
+			
+			$('.previous_mails').click(function () { 
+				// vyzobnu si z hrefu spravne cislo stranky
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_mails(article_page_num[2],send_or_recieved)
+			})
+
+			$('.next_mails').click(function () { 
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_mails(article_page_num[2],send_or_recieved)
+			})
+			
+		}); 
+	}
+    
+});
+
+{% endblock %}
+
+
+{% block title %}Uživatelska posta{% endblock %}
+
+{% block headline %}<h1>Uživatelský posta</h1>{% endblock %}
+
+{% block content %}
+
+
+<form action="." method="POST" >
+<table class='grey'>
+    {{ mail_form.as_table }}
+    <tr>
+    <td></td>
+    <td><input type="submit" value="Odeslat"></td>
+    </tr>
+</table>
+</form>
+
+<br />
+<form action="." method="POST" id="mailbox_switcher">
+{{ inbox_form.as_table }}
+</form>
+
+<div id="mails">
+<!-- generovano ajaxem -->
+</div>
+
+{% endblock %}

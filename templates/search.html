@@ -1,0 +1,46 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Vyhledávání{% endblock %}
+
+{% block script %}
+$(function(){
+   $("#tabs").tabs(); 
+});
+{% endblock %}
+
+{% block headline %}<h1>Vyhledávání: {{query}}</h1>{% endblock %}
+
+{% block content %}
+    <div class="detail">
+
+	<div id="tabs" > 
+		<ul > 
+			{% if  books_results %}<li><a href="#tabs-1">Knihy</a></li> {% endif %}
+			{% if  authors_results %}<li><a href="#tabs-2">Autoři</a></li> {% endif %} 
+			{% if  users_results %}<li><a href="#tabs-3">Uživatelé</a></li> {% endif %}
+		</ul> 
+
+		<div id="tabs-1">
+		    {%for one_result in books_results%}
+			<a href='/knihy/{{one_result.pk}}'>{{one_result.title}}</a> <br />
+		    {% endfor %}
+		</div>
+
+		<div id="tabs-2">
+		    {%for one_result in authors_results%}
+			<a href='/autori/{{one_result.pk}}'>{{one_result.first_name}} {{one_result.last_name}}</a> <br />
+		    {% endfor %}
+		    
+		</div> 
+
+		<div id="tabs-3">
+		    {%for one_result in users_results%}
+			<a href='/uzivatele/{{one_result.pk}}'>{{one_result.username}} - {{one_result.first_name}} {{one_result.last_name}}</a> <br />
+
+		    {% endfor %}
+		</div> 
+	</div> 
+    </div>
+
+
+{% endblock %}

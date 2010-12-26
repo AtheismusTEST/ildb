@@ -1,0 +1,120 @@
+{% extends "skeleton.html" %}
+
+{% block title %}Detail autora {{author.first_name}} {{author.last_name}}{% endblock %}
+
+{% block headline %}<h1>Detail autora: {{author.first_name}} {{author.last_name}}</h1>{% endblock %}
+
+{% block script %}
+$(function(){
+
+	print_books()
+
+	$("#ordering_form").change( function() {print_books()} )
+
+	
+	var current_type = "favourite_authors"
+	set_favourites_buttons(current_type);
+});
+
+<!-- vytiskne knizky autora podle danych orderovacich parametru ve formulari -->
+function print_books() {
+	/*  ZOBRAZIM LOADING nad vysledkama */
+	$("#results-loading").html("<strong>Prepocitavam...</strong><img src='/media/img/loading_gif.gif' width=20 >");
+
+	/* pozbiram data z formulare a zpracuji pro ajax*/
+
+	// vycucnu jak to mam radit
+	var order = $('select[name=order]').val()
+	var desc_or_asc = $('input[name=desc_or_asc]:radio:checked').val()
+
+	// a kdo to napsal
+	var author_id = $('#author_id').val();
+
+
+	$.post("/ajax/authors_books/", 
+		{ 'order': order , 'desc_or_asc':desc_or_asc, 'author_id':author_id},
+		function(data) {
+			$("#his_books").html(data);
+			
+			/* odstranim loading */
+			$("#results-loading").html("");
+		}
+	);
+}
+
+<!-- vytisknu cudliky na odebirani nebo pridavani do favourite pripadne je vubec nevistisknu pac je plno-->
+function set_favourites_buttons (entity_type) {
+
+    var entity_id = {{author.id}} // dosadim si to rovnou sem abych to nemusel nekde zbirat
+
+    // zjistim jestli tahle kniha je v oblibenejch tohoto uzivatele
+    $.ajax({
+	type: "GET",
+	url: "/ajax/is_in_favourite/"+entity_type+"/"+entity_id,
+	success:function(response){
+	    // je v oblibenych
+	    if (response == "True") {
+		$("#favourite_area").html("<a id='delete_favourite_button' href='#'  >Odebrat autora z mých oblíbených</a>");
+		$("#delete_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    delete_favourite(entity_type,{{author.id}})
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	    // neni v oblibenych
+	    if (response == "False") {
+		$("#favourite_area").html("<a id='add_favourite_button' href='#'  >Přidat autora k mým oblíbeným</a>");
+		$("#add_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    add_favourite(entity_type,{{author.id}}) 
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	}  
+    }); 
+
+}
+{% endblock %}
+
+{% block content %}
+    <div class="box detail">
+	<img src="/media/{{author.portrait}}" width="160" height="215" alt="autor" title="Portret autora" style="float:left" class='portrait'/>
+
+	<!-- hodnoceni -->
+	<div class="evaluation">
+	<div class='prc' >{{rating|floatformat}}%</div>
+	</div>
+
+	Jméno: {{author.first_name}} <br />
+	Příjmení: {{author.last_name}} <br />
+	Narozen: {{author.birth_day}} <br />
+	{% if author.death_day %} Zemřel: {{author.death_day}} <br /> {% endif %}
+
+	{% if user.is_authenticated %}
+	    <div id="favourite_area" ><!-- odkaz na pridani odebrani z favourites vyplnen Ajaxem--></div><br />
+	{% endif %}
+	<br />
+	About: <p>{{author.about}}</p>
+
+    </div>
+
+	<h4>Books: </h4>
+	Řadit podle:
+	<from action='.' method='post' id="ordering_form">
+		<input type="hidden" name="author_id" id="author_id" value="{{author.id}}" />
+		<select id="order" name="order">
+			<option value="publication_date">Datum vydání</option>
+			<option value="rating">Hodnocení</option>
+			<option value="title">Název</option>
+		</select>
+		<br />
+		<input id="DESC" type="radio" name="desc_or_asc" value="DESC" checked="checked" /><label for="DESC">Sestupně</label>
+		<input id="ASC"  type="radio" name="desc_or_asc" value="ASC" /><label for="ASC">Vzestupně</label><br />
+	</form>	
+
+	<div id="results-loading" style="width:100%; height:20px" ><!--vyplnovano jen v pripade reloadu resultu --></div>
+	<div id="his_books"><!-- vyplneno ajaxem --></div>
+
+
+    
+{% endblock %}

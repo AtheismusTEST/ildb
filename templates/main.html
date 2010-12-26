@@ -1,0 +1,71 @@
+{% extends "skeleton.html" %}
+
+{% block head_includes %}
+<!-- ajaxove nacitani nahlednu na celi single clanek a nahledu na urivky poslednich clanku  -->
+<!--<script type="text/javascript" src="/site_media/truncatable/jquery.truncatable.js"></script>  plugin do jquery na truncate -->
+<script type="text/javascript" src="http://dev.ildb.cz/media/articles_load.js"></script>
+{% endblock %}
+{% block script %}
+
+// --- desnej chytak. Funkce co se sama spusti a pak se furt vola dokola a navic az po dokonce ajaxu + interval nastavenej
+// lepsi nez setInterval pac ceka az se ten ajax provede a pak az to znova vola navic to funguje vsude
+$(function(){
+
+    (function update_news(){
+		$('#updated_news').load('ajax/update_news/', function () {
+			setTimeout(update_news,60*1000)
+		}); 
+	
+    })()
+});
+{% endblock %}
+
+{% block title %}Uvodni stranka{% endblock %}
+
+{% block headline %}
+<h1>Vítejte na ILDB - Internetová literarní databáze</h1>
+<p>
+Uvodní stránka, ktérá vás udrží v kontaktu s děním ze světa knih
+</p>
+{% endblock %}
+
+{% block content %}
+
+<div style="height:140px">
+	<div class="left">
+		<h3>O ILDB:</h3>
+		ILDB je ambiciozní projekt utvoření svobodné a každému přístupné databaze knih. 
+		Stavá se místem svobodné diskuze a zdílení myšlenek.
+	</div>
+
+	<div class="right">
+		<div class="box" >
+			<!-- posledni deni na csld -->
+			<div id="updated_news" >
+				<strong>Načítám novinky...</strong>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- novinky ze sveta knih -->
+<div class="left">
+	<h3>Novinky ze světa knih</h3>
+	<div id="articles" >
+		<!-- vyplnovano ajaxem -->
+		<strong>Načítám články...</strong>
+	</div>
+
+</div>
+
+<div class="right" id="evanescent" >
+
+	<img src="/media/img/ads.jpg" style="width:250px; " />
+	<img src="/media/img/ads.jpg" style="width:250px; " />
+	<img src="/media/img/ads.jpg" style="width:250px; " />
+	<img src="/media/img/ads.jpg" style="width:250px; " />
+</div>
+
+</div>
+{% endblock %}

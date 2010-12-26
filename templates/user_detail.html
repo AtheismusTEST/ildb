@@ -1,0 +1,200 @@
+{% extends "skeleton.html" %}
+
+<!-- moje specialni tagy a filtry pro template engine -->
+{% load books_extras %}
+
+{% block title %}Detail uživatele {{viewed_user.first_name}} {{viewed_user.last_name}}{% endblock %}
+
+{% block script %}
+$(function(){
+   $("#tabs").tabs(); 
+	
+	print_all_user_comments(1,{{viewed_user.id}});
+	print_all_user_ratings(1,{{viewed_user.id}});
+
+	$("#comment_order").change(function () {print_all_user_comments(1,{{viewed_user.id}});} )
+	$("#rating_order").change(function () {print_all_user_ratings(1,{{viewed_user.id}});} )
+
+    var current_type = "favourite_users";
+    set_favourites_buttons(current_type);
+	
+});
+
+function print_all_user_comments(page,user_id) {
+
+	var order = $('#comment_order').val()
+	$('#his-comments').empty().html("<strong>Nacitam...</strong>")
+
+	$.post("/ajax/print_all_user_comments/", 
+		{ 'page': page , 'user_id':user_id, 'order':order},
+    	function (content) {
+	
+			
+			$('#his-comments').html(content);
+
+			// obsluha navigacnich odkazu
+			$('.previous_comments').click(function () { 
+				// vyzobnu si z hrefu spravne cislo stranky
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_all_user_comments(article_page_num[2],{{viewed_user.id}})
+			})
+
+			$('.next_comments').click(function () { 
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_all_user_comments(article_page_num[2],{{viewed_user.id}})
+			})
+	
+    	}
+	); 
+}
+
+function print_all_user_ratings(page,user_id) {
+	var order = $('#rating_order').val()
+	$('#his-ratings').empty().html("<strong>Nacitam...</strong>")
+
+ 	$.post("/ajax/print_all_user_ratings/", 
+		{ 'page': page , 'user_id':user_id, 'order':order},
+    	function (content) {
+	
+			
+			$('#his-ratings').html(content);
+
+			// obsluha navigacnich odkazu
+			$('.previous_ratings').click(function () { 
+				// vyzobnu si z hrefu spravne cislo stranky
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_all_user_ratings(article_page_num[2],{{viewed_user.id}});
+
+			})
+
+			$('.next_ratings').click(function () { 
+				var article_page_num = $(this).attr('href').split('_')
+
+				print_all_user_ratings(article_page_num[2],{{viewed_user.id}});
+			})
+	
+    	}
+	); 
+}
+
+<!-- vytisknu cudliky na odebirani nebo pridavani do favourite pripadne je vubec nevistisknu pac je plno-->
+function set_favourites_buttons (entity_type) {
+
+    var entity_id = {{viewed_user.id}} // dosadim si to rovnou sem abych to nemusel nekde zbirat
+
+    // zjistim jestli tahle kniha je v oblibenejch tohoto uzivatele
+    $.ajax({
+	type: "GET",
+	url: "/ajax/is_in_favourite/"+entity_type+"/"+entity_id,
+	success:function(response){
+	    // je v oblibenych
+	    if (response == "True") {
+		$("#favourite_area").html("<a id='delete_favourite_button' href='#'  >Odebrat uživatele z mích oblíbených</a>");
+		$("#delete_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    delete_favourite(entity_type,{{viewed_user.id}})
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	    // neni v oblibenych
+	    if (response == "False") {
+		$("#favourite_area").html("<a id='add_favourite_button' href='#'  >Přidat uživatele k mím oblíbeným</a>");
+		$("#add_favourite_button").click(function (){
+		    $("#favourite_area").html("<a href='#'>Ukládám...</a>")
+		    add_favourite(entity_type,{{viewed_user.id}}) 
+		    set_favourites_buttons(entity_type)
+		});
+	    }
+	}  
+    }); 
+
+}
+{% endblock %}
+
+{% block headline %}<h1>Uživatel: {{viewed_user.username}}</h1>{% endblock %}
+
+{% block content %}
+    <div class="detail">
+	
+	<div id="tabs" > 
+		<ul > 
+		    <li><a href="#tabs-1">Profil</a></li> 
+		    <li><a href="#tabs-2">Oblíbené</a></li> 
+		    <li><a href="#tabs-3">Recenze</a></li> 
+		    <li><a href="#tabs-4">Hodnocení</a></li>
+		</ul> 
+
+		<div id="tabs-1" class='detail' >
+		{% if profile.portrait %} 
+	    	<img src="/media/{{profile.portrait}}" alt="" width="130" height="130" title="Obrazek Obalky" style="float:left" class='portrait'/>
+		{% endif %}    
+		    <!-- body respektu -->
+		    <div class="respect">
+		    <strong>Body respektu: {{respect_points}}</strong>
+		    </div>
+
+		    <br /> 
+		    Přezdivka: {{ viewed_user.username }} <br /> 
+		    Jméno: {{ viewed_user.first_name }} <br />
+		    Příjmení: {{ viewed_user.last_name }} <br />
+		    {% if user.is_authenticated %}
+			<div id="favourite_area" ><!-- odkaz na pridani odebrani z favourites vyplnen Ajaxem--></div>
+			<a href='/accounts/mailbox/consignee/{{viewed_user.id}}'>Napsat zpravu tomuto uživateli</a><br />
+		    {% endif %}
+		    <h4> O mně:</h4>
+		    <p>{{ profile.info }}</p>
+		     
+		</div>
+
+		<div id="tabs-2"  >
+		    <h4>Oblíbené knihy:</h4>
+		    {% for book in favourite_books %}
+			<a href="/knihy/{{book.id}}"> {{ book.title }}</a><br />
+		    {% endfor %}
+
+		    <h4>Oblíbení autoři:</h4>
+		    {% for author in favourite_authors %}
+			<a href="/autori/{{author.id}}">{{ author.first_name }} {{ author.last_name }}</a><br />
+		    {% endfor %}
+
+		    <h4>Oblíbení uživatelé:</h4>
+		    {% for f_user in favourite_users %}
+			<a href="/uzivatele/{{f_user.id}}">{{ f_user.first_name }} {{ f_user.last_name }}</a><br />
+		    {% endfor %}
+		</div> 
+
+		<div id="tabs-3">
+			Seřadit podle:
+			<select id="comment_order">
+				<option value="date" >data</option>
+				<option value="rating" >hodnoceni</option>
+				<option value="book_name" >nazvu knihy</option>
+			</select>
+			<br /><br /><br />
+			<div id="his-comments" >
+			<!-- vyplneno javascriptem -->
+			</div>
+
+		</div> 
+
+		<div id="tabs-4">
+			Seřadit podle:
+			<select id="rating_order">
+				<option value="-id" >data</option>
+				<option value="-rate" >hodnoceni</option>
+				<option value="book__title" >nazvu knihy</option>
+
+			</select>
+			<br /><br /><br />
+			<div id="his-ratings" >
+			<!-- vyplneno javascriptem -->
+			</div>
+		</div> 
+	</div> 
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,8 @@
+<div>
+<h3>Novinky na čsld</h3>
+<p>Proslední přidaná kniha: <a href='/knihy/{{last_book.pk}}'>{{last_book.title}} </a></p>
+<p>Proslední přidaný autor: <a href='/autori/{{last_author.pk}}'>{{last_author.first_name}} {{last_author.last_name}}</a></p>
+<p>Nejnovější uživatel: <a href='/uzivatele/{{last_user.pk}}'>{{last_user.username}}</a></p>
+<p>Nejnovější komentář: <a href='/knihy/{{last_comment.book.pk}}'>{{last_comment.user.username}} o knize {{last_comment.book.title}}</a></p>
+Naposledy aktualizováno ({{last_update_time}})
+</div>
